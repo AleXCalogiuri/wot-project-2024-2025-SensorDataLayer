@@ -69,13 +69,13 @@ class SensorService:
             return {'error': f'Failed to retrieve sensor: {str(e)}'}, 500
 
     @staticmethod
-    def update_sensor(sensor_id: str, sensor_dto: SensorDTO):
+    def update_sensor(sensor_dto: SensorDTO):
         """Updates an existing sensor"""
         try:
             sensor_model = Sensor("", 0, "", datetime.datetime.now(), datetime.datetime.now(), Status.ACTIVE)
 
             # Check if sensor exists
-            if not sensor_model.findBySensorId(sensor_id):
+            if not sensor_model.findBySensorId(sensor_dto.sensorId):
                 return {'error': 'Sensor not found'}, 404
 
             # Convert DTO status string to Status enum
@@ -85,7 +85,7 @@ class SensorService:
 
             # Create updated sensor object
             updated_sensor = Sensor(
-                sensorId=sensor_id,
+                sensorId=sensor_dto.sensorId,
                 serial=int(sensor_dto.serialNumber),
                 model=sensor_dto.model,
                 installationDate=sensor_dto.installationDate,
@@ -134,9 +134,6 @@ class SensorService:
             if not existing:
                 return {'error': 'Sensor not found'}, 404
 
-            # Set status to INACTIVE (soft delete)
-            # Note: You'll need to implement update_status method or similar
-            # For now, this is a placeholder
 
             return {'message': 'Sensor deactivated successfully'}, 200
 
