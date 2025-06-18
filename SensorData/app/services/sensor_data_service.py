@@ -8,7 +8,7 @@ from app.dto.sensor_data_dto import SensorDataDTO  # Import the DTO class
 class SensorDataService:
 
     @staticmethod
-    def get_sensor(sensor_data_id: str):
+    def get_dati_sensore(sensor_data_id: str):
         """Retrieves a sensor by ID and returns as DTO"""
         try:
 

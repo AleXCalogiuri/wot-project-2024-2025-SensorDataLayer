@@ -16,7 +16,7 @@ def create_sensor():
 @sensor_bp.route('/sensors/<id>', methods=['GET'])
 def get_sensor(id):
     '''get sensor by id'''
-    result, status_code = SensorService.get_sensor(id)
+    result, status_code = SensorService.get_dati_sensore(id)
     return jsonify(result), status_code
 
 
