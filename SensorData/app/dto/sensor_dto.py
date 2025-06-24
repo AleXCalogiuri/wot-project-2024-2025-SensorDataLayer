@@ -41,7 +41,7 @@ class SensorDTO(BaseDTO):
             lastCalibrationDate (datetime): Date and time of the last calibration.
             status (str): Current status of the sensor, one of ["ACTIVE", "INACTIVE", "MAINTENANCE"].
         """
-        sensorId = fields.Str(required=True)
+        sensorId = fields.Str(required=False)
         serialNumber = fields.Str(required=True, validate=validate.Length(min=5))
         model = fields.Str(required=True, validate=validate.Length(min=6))
         installationDate = fields.DateTime(required=True)

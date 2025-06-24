@@ -1,54 +1,71 @@
-#classe che gestice
-from pyexpat import features
-import joblib
-from SensorData.app.dto.prediction_dto import PredictionDTO
-from SensorData.app.models.sensor_data import SensorData
-from SensorData.app.services.sensor_data_service import SensorDataService
-from SensorData.app.services.sensor_service import SensorService
-from SensorData.app.utils.sensor_utl import SensorUTL
-from SensorData.ml_model.random_forest import RandomForest
+#classe che gestice il modello
+
+from app.ml_model.model_loader import model_info
+from app.ml_model.model_loader import model
+from app.services.sensor_service import SensorService
+from app.utils.sensor_utl import SensorUTL
+from app.services.model_loader import model, model_info
+
 
 
 class PredictionService:
 
     #qui carica il modello
-    def __init__(self):
-        self.model = joblib.load('random_forest.joblib')
+    def __init__(self, model, model_info):  # Riceve i modelli come parametri
+        self.model = model
+        self.model_info = model_info
 
-    def send_prediction(self, sensor_data_dto,sensor_productor_id):
+    def send_prediction(self, predicition_request_dto):
         try:
 
             '''chiama il servizio dei sensori'''
-            sensore_attivato = SensorService.get_sensor(sensor_productor_id)
+            sensore_attivato = SensorService.get_sensor(predicition_request_dto.sensor_id)
             if sensore_attivato is None: #se non trova il sensore allora lo aggiunge
-                SensorService.add_sensor(sensore_attivato)
-            dati_sensore = SensorDataService.get_dati_sensore(sensor_data_dto.sensor_data_id)
+                return {'error': 'Non risulta alcun sensore con questo id, operazione annullata'}, 404
 
+            #prima proviamo a caricare i dati già disponibili, poi dopo verifica che ce ne siano di nuovi
+            #dati_sensore = SensorDataService.get_dati_sensore(predicition_request_dto.sensor_data_id)
+            gps_latitude = predicition_request_dto.gps_latitude
+            gps_longitude = predicition_request_dto.gps_longitude
+
+            features = [predicition_request_dto.acc_x, predicition_request_dto.acc_y,
+                        predicition_request_dto.gyro_x, predicition_request_dto.gyro_y, predicition_request_dto.gyro_z]
             #crea l'array con i dati del sensore
-            prediction = self.__predict(dati_sensore)
+            prediction = self.__predict(features)
             #prepara il json da restiuire
 
             response = {
-                            'sensor_productor': SensorUTL.toDto(sensore_attivato),
+                            'sensor_productor': SensorUTL.toDto(sensore_attivato) ,
                             'classificazione': prediction,
-                            'posizione_gps_latitude': dati_sensore.gps_latitude,
-                            'posizione_gps_longitude': dati_sensore.gps_longitude
+                            'posizione_gps_latitude': gps_latitude,
+                            'posizione_gps_longitude': gps_longitude
                         }
             return response,200
+
+        except FileNotFoundError as e:
+            return {'error': 'Model file not found'}, 500
         except ValueError as e:
-            return {'error': f'Invalid status value: {str(e)}'}, 400
+            return {'error': f'Invalid data: {str(e)}'}, 400
         except Exception as e:
             return {'error': f'Internal error: {str(e)}'}, 500
 
+
     def __predict(self, sensor_data_dto):
-        #TODO controlla bene i campi in input, perché mi sa che devono essere mappati con il nome nel csv
+        #NB non cambiare l'ordine perché è come le vuole il modello
         features = [sensor_data_dto.accelerometer_x,
                     sensor_data_dto.accelerometer_y,
                     sensor_data_dto.gyroscope_x,
                     sensor_data_dto.gyroscope_y,
                     sensor_data_dto.gyroscope_z
                     ]
-        # TODO sostituire con file serializzato attualmente non funziona
-        prediction = RandomForest.classificatore()
+
+        #Validazione
+        if any(x is None for x in features):
+            raise ValueError("Missing sensor data values")
+
+        if not all(isinstance(x, (int, float)) for x in features):
+            raise ValueError("All sensor values must be numeric")
+
         prediction = self.model.predict([features])
-        return prediction[0]
+        result = model_info['class_mapping'][prediction[0]]
+        return result

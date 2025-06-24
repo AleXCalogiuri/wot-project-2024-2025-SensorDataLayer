@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from app.dto.sensor_dto import SensorDTO
-from app.services.sensor_service import SensorService
+from SensorData.app.dto.sensor_dto import SensorDTO
+from SensorData.app.services.sensor_service import SensorService
 
 sensor_bp = Blueprint('sensors', __name__)
 

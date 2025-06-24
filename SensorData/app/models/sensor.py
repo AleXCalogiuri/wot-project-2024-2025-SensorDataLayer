@@ -36,7 +36,7 @@ class Sensor:
         con = db.Database.connect()
         cursor = con.cursor()
         cursor.execute("""CREATE TABLE IF NOT EXISTS sensors 
-                          ( serialId INTEGER PRIMARY KEY AUTOINCREMENT,
+                          ( sensorId INTEGER PRIMARY KEY AUTOINCREMENT,
                             model TEXT,
                             serial INTEGER,
                             installationDate DATETIME,
