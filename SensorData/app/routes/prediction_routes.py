@@ -1,11 +1,12 @@
 from flask import Blueprint, jsonify, request
-from app.dto.prediction_request_dto import PredictRequestDTO
-from app.services.prediction_service import PredictionService
 
-sensor_bp = Blueprint('predict', __name__)
+from ..services.prediction_service import PredictionService
+from ..ml_model.model_loader import model,model_info
 
-@sensor_bp.route('/model', methods=['POST'])
+predict_bp = Blueprint('predict', __name__)
+
+@predict_bp.route('/model', methods=['POST'])
 def  classifica():
-
-    result,status = PredictionService.send_prediction(request.json)
+    json_data = request.json  # Ottiene i dati JSON come dizionario
+    result, status = PredictionService.validate_json_request(json_data)
     return jsonify(result),status

@@ -1,9 +1,9 @@
 import sqlite3
-from app.settings.settings import DATABASE_CONFIG
+from ..settings.settings import DATABASE_CONFIG
 class Database:
 
     @staticmethod
-    def connect(self):
+    def connect():
         connection = sqlite3.connect(DATABASE_CONFIG["NAME"])
         return connection
 

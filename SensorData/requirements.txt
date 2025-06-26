@@ -15,6 +15,8 @@ scikit-learn
 pandas>=2.2.3.250527
 matplotlib
 joblib
+debugpy
+pandas>=2.2.3.250527
 
 # Typing e compatibilità
 typing-extensions>=4.0.0

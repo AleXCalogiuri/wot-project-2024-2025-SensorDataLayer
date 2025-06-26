@@ -1,6 +1,6 @@
-from marshmallow import Schema, fields, validate, post_load, ValidationError
+from marshmallow import Schema, fields, post_load, ValidationError
 from .base_dto import BaseDTO
-from app.dto.sensor_dto import SensorDTO
+from ..dto.sensor_dto import SensorDTO
 
 """
 PredictionDTO Module
@@ -39,7 +39,9 @@ class PredictionDTO(BaseDTO):
             posizione_gps_longitude (float): The GPS longitude of the prediction.
 
         """
-        sensor_productor = fields.Nested(SensorDTO.Schema, required=True)
+        sensor_id = fields.Str()
+        sensor_model = fields.Str()
+        sensor_serial= fields.Str()
         classificazione = fields.Str(required=True)
         posizione_gps_latitude = fields.Float(required=True)
         posizione_gps_longitude = fields.Float(required=True)
@@ -58,7 +60,7 @@ class PredictionDTO(BaseDTO):
         """
         return PredictionDTO(**data)
 
-    def __init__(self, sensor_productor, classificazione, posizione_gps_latitude, posizione_gps_longitude):
+    def __init__(self, sensor_id,sensor_model,sensor_serial, classificazione, posizione_gps_latitude, posizione_gps_longitude):
         """
         Initialize a new PredictionDTO instance.
 
@@ -68,7 +70,9 @@ class PredictionDTO(BaseDTO):
             posizione_gps_latitude (float): The GPS latitude of the prediction.
             posizione_gps_longitude (float): The GPS longitude of the prediction.
         """
-        self.sensor_productor = sensor_productor
+        self.sensor_id = sensor_id
+        self.sensor_model = sensor_model
+        self.sensor_serial = sensor_serial
         self.classificazione = classificazione
         self.posizione_gps_latitude = posizione_gps_latitude
         self.posizione_gps_longitude = posizione_gps_longitude
@@ -112,6 +116,10 @@ class PredictionDTO(BaseDTO):
                   - 'classificazione': The classification result
         """
         return {
-            'sensor_productor': self.sensor_productor.to_dict(),  # Serializes using the sensor_dto's to_dict method
-            'classificazione': self.classificazione
+            'sensor_id': self.sensor_id,
+            'sensor_model': self.sensor_model,
+            'sensor_serial': self.sensor_serial,
+            'classificazione': self.classificazione,
+            'gps_latitude': self.posizione_gps_latitude,
+            'gps_longitude': self.posizione_gps_longitude
         }

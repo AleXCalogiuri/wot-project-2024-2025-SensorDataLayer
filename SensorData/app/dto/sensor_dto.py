@@ -44,8 +44,6 @@ class SensorDTO(BaseDTO):
         sensorId = fields.Str(required=False)
         serialNumber = fields.Str(required=True, validate=validate.Length(min=5))
         model = fields.Str(required=True, validate=validate.Length(min=6))
-        installationDate = fields.DateTime(required=True)
-        lastCalibrationDate = fields.DateTime()
         status = fields.Str(validate=validate.OneOf(['ACTIVE', 'INACTIVE', 'MAINTENANCE']))
 
         @post_load
@@ -62,7 +60,7 @@ class SensorDTO(BaseDTO):
             """
             return SensorDTO(**data)
 
-    def __init__(self, sensorId, serialNumber, model, installationDate, lastCalibrationDate, status):
+    def __init__(self, sensorId, serialNumber, model, status):
         """
         Initialize a new SensorDTO instance.
 
@@ -70,15 +68,12 @@ class SensorDTO(BaseDTO):
             sensorId (str): Unique identifier for the sensor.
             serialNumber (str): Serial number of the sensor.
             model (str): Model of the sensor.
-            installationDate (datetime): Date and time when the sensor was installed.
-            lastCalibrationDate (datetime): Date and time of the last calibration.
+
             status (str): Current status of the sensor.
         """
         self.sensorId = sensorId
         self.serialNumber = serialNumber
         self.model = model
-        self.installationDate = installationDate
-        self.lastCalibrationDate = lastCalibrationDate
         self.status = status
 
     @classmethod
@@ -121,8 +116,6 @@ class SensorDTO(BaseDTO):
             'sensorId': self.sensorId,
             'serialNumber': self.serialNumber,
             'model': self.model,
-            'installationDate': self.installationDate.isoformat() if self.installationDate else None,
-            'lastCalibrationDate': self.lastCalibrationDate.isoformat() if self.lastCalibrationDate else None,
             'status': self.status
         }
 

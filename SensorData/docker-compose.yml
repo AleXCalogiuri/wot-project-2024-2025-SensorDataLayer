@@ -7,10 +7,21 @@ services:
     ports:
       - "8006:5000"
       - "8000:8000"
+      - "5679:5678"
     expose:
       - "8000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PYTHONUNBUFFERED=1
+      - DEBUGGER_PORT=5679
     volumes:
-      - ./app:/usr/src/app
+      - .:/app
+      - sensor_data_volume:/data
+    cap_add:
+      - SYS_PTRACE  # Necessario per alcuni debugger
+    security_opt:
+      - seccomp:unconfined
     depends_on:
       - sqlite
     networks:
