@@ -1,7 +1,7 @@
 import datetime
-
-from app.models.sensor import Sensor, Status  # Import the class and enum
-from app.dto.sensor_dto import SensorDTO  # Import the DTO class
+from ..models.sensor import Sensor,Status
+from ..dto.sensor_dto import SensorDTO  # Import the DTO class
+from ..utils.sensor_utl import SensorUTL
 
 #classe di servizio per mappare i sensori
 class SensorService:
@@ -12,39 +12,20 @@ class SensorService:
         """Creates a new sensor"""
         try:
             # Create an instance to call the method
-            sensor_model = Sensor("", 0, "", datetime.datetime.now(), datetime.datetime.now(), Status.ACTIVE)
-
-            # Check if sensor already exists
-            if sensor_model.findBySensorId(sensor_dto.sensorId):
-                return {'error': 'il sensore è già stato inserito'}, 409
+            sensor_model = SensorUTL.to_model(sensor_dto)
 
             # Convert DTO status string to Status enum
             status_enum = Status.ACTIVE  # Default
             if sensor_dto.status:
                 status_enum = Status(sensor_dto.status)
 
-            # Create new sensor using factory method
-            sensor = Sensor.create_sensor(
-                sensorId=sensor_dto.sensorId,
-                serial=int(sensor_dto.serialNumber),  # Convert to int
-                model=sensor_dto.model,
-                installationDate=sensor_dto.installationDate,  # Use from DTO
-                lastCalibration=sensor_dto.lastCalibrationDate or datetime.datetime.now(),  # Use DTO or current
-                status=status_enum
-            )
-
+            # Create a new sensor using factory method
+            sensor_model.status = status_enum
             # Save the sensor
-            sensor.save()
+            added_sensor_id = sensor_model.save()
 
-            return {
-                'sensorId': sensor.sensorId,
-                'serial': sensor.serial,
-                'model': sensor.model,
-                'installationDate': sensor.installationDate.isoformat(),
-                'lastCalibration': sensor.lastCalibration.isoformat(),
-                'status': sensor.status.value,
-                'message': 'Sensor created successfully'
-            }, 201
+            result = SensorDTO(added_sensor_id,sensor_dto.serialNumber,sensor_dto.model,sensor_dto.status)
+            return result.to_dict(), 201
 
         except ValueError as ve:
             return {'error': f'Invalid status value: {str(ve)}'}, 400
@@ -55,56 +36,43 @@ class SensorService:
     def get_sensor(sensor_id: str):
         """Retrieves a sensor by ID and returns as DTO"""
         try:
-            sensor_model = Sensor("", 0, "", datetime.datetime.now(), datetime.datetime.now(), Status.ACTIVE)
-            result = sensor_model.findBySensorId(sensor_id)
+            sensor_founded = Sensor.find_by_sensor_id(sensor_id)
 
-            if result:
+            if sensor_founded:
                 # Convert database result to DTO format
+                result = SensorUTL.to_dto(sensor_founded)
                 # Note: you'll need to implement a method to get full sensor data
-                return {'sensor': result}, 200
+                return result.to_dict(), 200
             else:
                 return {'error': 'Sensor not found'}, 404
 
         except Exception as e:
             return {'error': f'Failed to retrieve sensor: {str(e)}'}, 500
 
+
+
     @staticmethod
-    def update_sensor(sensor_dto: SensorDTO):
+    def update_sensor_status(id,status):
         """Updates an existing sensor"""
         try:
-            sensor_model = Sensor("", 0, "", datetime.datetime.now(), datetime.datetime.now(), Status.ACTIVE)
-
             # Check if sensor exists
-            if not sensor_model.findBySensorId(sensor_dto.sensorId):
+            sensor_model = Sensor.find_by_sensor_id(id)
+            if not sensor_model or sensor_model is None:
                 return {'error': 'Sensor not found'}, 404
 
             # Convert DTO status string to Status enum
             status_enum = Status.ACTIVE  # Default
-            if sensor_dto.status:
-                status_enum = Status(sensor_dto.status)
+            if sensor_model.status:
+                status_enum = Status(sensor_model.status)
 
             # Create updated sensor object
-            updated_sensor = Sensor(
-                sensorId=sensor_dto.sensorId,
-                serial=int(sensor_dto.serialNumber),
-                model=sensor_dto.model,
-                installationDate=sensor_dto.installationDate,
-                lastCalibration=sensor_dto.lastCalibrationDate or datetime.datetime.now(),
-                status=status_enum
-            )
+            sensor_model.status = status_enum
+
 
             # Save (will update since it exists)
-            updated_sensor.save()
-
-            return {
-                'sensorId': updated_sensor.sensorId,
-                'serial': updated_sensor.serial,
-                'model': updated_sensor.model,
-                'installationDate': updated_sensor.installationDate.isoformat(),
-                'lastCalibration': updated_sensor.lastCalibration.isoformat(),
-                'status': updated_sensor.status.value,
-                'message': 'Sensor updated successfully'
-            }, 200
+            sensor_model.save()
+            result = SensorUTL.to_dto(sensor_model)
+            return result, 200
 
         except ValueError as ve:
             return {'error': f'Invalid status value: {str(ve)}'}, 400
@@ -127,11 +95,10 @@ class SensorService:
     def delete_sensor(sensor_id: str):
         """Deletes a sensor (sets status to INACTIVE)"""
         try:
-            sensor_model = Sensor("", 0, "", datetime.datetime.now(), datetime.datetime.now(), Status.ACTIVE)
 
             # Check if sensor exists
-            existing = sensor_model.findBySensorId(sensor_id)
-            if not existing:
+            existing = Sensor.find_by_sensor_id(sensor_id)
+            if not existing or existing is None:
                 return {'error': 'Sensor not found'}, 404
 
 
@@ -139,3 +106,26 @@ class SensorService:
 
         except Exception as e:
             return {'error': f'Failed to delete sensor: {str(e)}'}, 500
+
+
+    @classmethod
+    def get_all_sensors(cls):
+        row_dto_list = []
+        records = Sensor.find_all()
+        for row in records:
+
+            row_dto = SensorUTL.to_dto(row)
+            row_dto_list.append(row_dto.to_dict())  # to_dict() qui, non prima
+
+        return row_dto_list,200
+
+
+    #attenzione perché qui restituisce un dict, quindi il dato trattalo come tale
+    @classmethod
+    def get_dati_sensore(cls, sensor_id):
+        row_tuple = Sensor.find_by_sensor_id(sensor_id)
+        result = SensorUTL.to_dto(row_tuple)
+        if not result or result is None:
+            return {'error': 'Sensor not found'}, 404
+
+        return result.to_dict(),200

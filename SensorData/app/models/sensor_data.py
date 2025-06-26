@@ -1,7 +1,8 @@
 # models/sensor_service.py
 from dataclasses import dataclass
 from typing import Optional
-import app.models.database as db
+
+from .database import Database as db
 import datetime
 
 
@@ -29,6 +30,7 @@ SensorData {
 }
 '''
 
+#TODO valuta se aggiungere una find all, per processo di tuning da sensore
 @dataclass
 class SensorData:
     sensor_data_id: int
@@ -38,37 +40,33 @@ class SensorData:
     gyroscope_x: float
     gyroscope_y: float
     gyroscope_z: float
-    timestamp: str
+    timestamp: datetime.datetime
     gps_lat: Optional[float] = None
     gps_lon: Optional[float] = None
 
-@dataclass
-class PredictionResult:
-    road_condition: str
-    confidence: float
-    timestamp: str
-    sensor_id: str
-
-    '''Esegue le query di creazione'''
-
-#TODO valutare se poi devi aggiungere  temperatura e umidità
     def init_db(self):
-        con = db.Database.connect()
+        con = db.connect()
         cursor = con.cursor()
-        cursor.execute("""CREATE TABLE IF NOT EXISTS sensors 
-                          ( sensor_dataId INTEGER PRIMARY KEY AUTOINCREMENT,
-                            timestamp TEXT,
-                            acc_x REAL, acc_y REAL, acc_z REAL
-                            gyro_x REAL, gyro_y REAL, gyro_z REAL,
-                            gps_latitudine REAL, gps_longitudine REAL
+        cursor.execute("""CREATE TABLE IF NOT EXISTS sensors_data
+                          (
+                              sensor_dataId INTEGER PRIMARY KEY AUTOINCREMENT,
+                              acc_x REAL,
+                              acc_y REAL,
+                              acc_z REAL,
+                              gyro_x REAL,
+                              gyro_y REAL,
+                              gyro_z REAL,
+                              timestamp DATETIME,
+                              gps_latitudine REAL,
+                              gps_longitudine REAL
                           )
-        """)
+                       """)
         con.commit()
         con.close()
 
-
-    def insert_sensor_data(self, sensor_data):
-        con = db.Database.connect()
+    @staticmethod
+    def insert_sensor_data(sensor_data):
+        con = db.connect()
         cursor = con.cursor()
         #qui sulle query usare i placeholder per evitare sql injection
         cursor.execute("""INSERT INTO sensors_data
@@ -91,20 +89,26 @@ class PredictionResult:
                             sensor_data.gps_lon
                           )
                        )
+        row = cursor.lastrowid
         con.commit()
         con.close()
+        return row
 
 
-    def findBySensorId(self, sensor_data_id):
-        con = db.Database.connect()
+    @staticmethod
+    def find_by_sensor_id(sensor_data_id):
+        con = db.connect()
         cursor = con.cursor()
         cursor.execute("""SELECT * FROM sensors_data WHERE sensor_dataId = ?""",
                        (sensor_data_id))
+        row = cursor.fetchone()
         con.commit()
         con.close()
+        return row
 
-    def updateSensor(self, sensor_data):
-        con = db.Database.connect()
+    @staticmethod
+    def update_sensor(sensor_data):
+        con = db.connect()
         cursor = con.cursor()
         cursor.execute("""UPDATE sensors_data
                           SET accelerometer_x = ?,
@@ -129,13 +133,15 @@ class PredictionResult:
                         sensor_data.gps_lon
                         )
                        )
+        affected_rows = cursor.rowcount
         con.commit()
         con.close()
-        return cursor.rowcount
+        return affected_rows
 
 
-    def deleteSensor(self, sensor_data_id):
-        con = db.Database.connect()
+    @staticmethod
+    def delete_sensor(self, sensor_data_id):
+        con = db.connect()
         cursor = con.cursor()
         cursor.execute("""DELETE FROM sensors_data WHERE sensor_data_id = ?""",(sensor_data_id,))
 
@@ -155,8 +161,21 @@ class PredictionResult:
 
     def save(self):
         """Saves this sensor instance to the database"""
-        id = self.findBySensorId(self.senso_data_id)
+        id = self.find_by_sensor_id(self.senso_data_id)
         if id is None:
             self.insert_sensor(self) # CREATE
         else:
-            self.updateSensor(self) # UPDATE
+            self.update_sensor(self) # UPDATE
+
+'''
+
+@dataclass
+class PredictionResult:
+    road_condition: str
+    confidence: float
+    timestamp: str
+    sensor_id: str
+
+    '''
+
+

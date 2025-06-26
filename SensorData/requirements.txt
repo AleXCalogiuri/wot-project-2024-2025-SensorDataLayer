@@ -1,7 +1,22 @@
+# Per compatibilità con Python < 3.7
+dataclasses; python_version < "3.7"
+
+# Framework e librerie Flask
 flask~=3.1.0
 flask-cors>=4.0.0
-marshmallow>=3.20.0
-Werkzeug>=3.0.0
 flask-debugtoolbar>=0.13.0
+Werkzeug>=3.0.0
+
+# Serializzazione e validazione
+marshmallow>=3.20.0
+
+# ML, analisi dati e grafici
+scikit-learn
+pandas>=2.2.3.250527
+matplotlib
+joblib
+debugpy
+pandas>=2.2.3.250527
+
+# Typing e compatibilità
 typing-extensions>=4.0.0
-dataclasses; python_version < "3.7"

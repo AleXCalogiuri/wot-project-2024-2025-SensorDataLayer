@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request
-from app.dto.sensor_dto import SensorDTO
-from app.services.sensor_service import SensorService
+from ..services.sensor_service import SensorService
 
 sensor_bp = Blueprint('sensors', __name__)
 
@@ -16,25 +15,27 @@ def create_sensor():
 @sensor_bp.route('/sensors/<id>', methods=['GET'])
 def get_sensor(id):
     '''get sensor by id'''
-    result, status_code = SensorService.get_sensor(id)
+    result, status_code = SensorService.get_dati_sensore(id)
     return jsonify(result), status_code
 
 
-@sensor_bp.route('/sensors', methods=['GET'])
+@sensor_bp.route('/sensors/get-all', methods=['GET'])
 def get_all_sensors():
     '''get all sensors'''
     result, status_code = SensorService.get_all_sensors()
     return jsonify(result), status_code
 
+#questa disattiva il sensore
 @sensor_bp.route('/sensors/<id>', methods=['DELETE'])
 def remove_sensor(id):
     '''remove sensor by id'''
-    result, status_code = SensorService.remove_sensor(id)
+    result, status_code = SensorService.delete_sensor(id)
     return jsonify(result), status_code
 
-@sensor_bp.route('/sensors/<id>', methods=['POST'])
+#TODO questa possiamo eliminarla
+@sensor_bp.route('/sensors/upd/<id>', methods=['POST'])
 def update_sensor(id):
     '''update sensor by id'''
-    result, status_code = SensorService.update_sensor(request.json)
+    result, status_code = SensorService.update_sensor_status(id)
     return jsonify(result), status_code
 
