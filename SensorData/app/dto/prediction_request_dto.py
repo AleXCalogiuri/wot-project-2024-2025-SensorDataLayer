@@ -13,6 +13,7 @@ class PredictRequestDTO(BaseDTO):
         gps_latitude = fields.Float()
         gps_longitude = fields.Float()
         sensor_data_id = fields.Integer()
+        strada_rilevamento = fields.Str(required=True)
 
 
     @post_load
@@ -20,7 +21,7 @@ class PredictRequestDTO(BaseDTO):
         return PredictRequestDTO(**data)
 
 
-    def __init__(self,sensor_id,acc_x,acc_y,gyro_x,gyro_y,gyro_z,gps_latitude,gps_longitude,sensor_data_id):
+    def __init__(self,sensor_id,acc_x,acc_y,gyro_x,gyro_y,gyro_z,gps_latitude,gps_longitude,sensor_data_id,strada_rilevamento):
         self.sensor_id = sensor_id
         self.acc_x = acc_x
         self.acc_y = acc_y
@@ -30,6 +31,7 @@ class PredictRequestDTO(BaseDTO):
         self.gps_latitude = gps_latitude
         self.gps_longitude = gps_longitude
         self.sensor_data_id = sensor_data_id
+        self.strada_rilevamento = strada_rilevamento
 
     @classmethod
     def from_request(cls, json_data=None):
@@ -53,5 +55,6 @@ class PredictRequestDTO(BaseDTO):
             "gyro_z": self.gyro_z,
             "gps_latitude": self.gps_latitude,
             "gps_longitude": self.gps_longitude,
-            "sensor_data_id": self.sensor_data_id
+            "sensor_data_id": self.sensor_data_id,
+            "strada_rilevamento": self.strada_rilevamento
         }
