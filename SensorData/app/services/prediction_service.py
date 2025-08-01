@@ -94,12 +94,10 @@ class PredictionService:
 
             # Crea il DTO di risposta
             prediction_dto = PredictionDTO(
-                sensor_id=str(id),
-                sensor_model=str(modello),
-                sensor_serial=seriale,
                 classificazione=str(prediction),
                 posizione_gps_latitude=gps_latitude,
-                posizione_gps_longitude=gps_longitude
+                posizione_gps_longitude=gps_longitude,
+                strada_rilevamento= predicition_request_dto.strada_rilevamento
             )
             print(type(id), type(modello), type(seriale), type(prediction), type(gps_latitude), type(gps_longitude))
 

@@ -21,30 +21,18 @@ class PredictionDTO(BaseDTO):
 
     This class handles the serialization and deserialization of prediction data,
     including validation of input data and conversion between JSON and object formats.
-
-    Attributes:
-        sensor_productor (SensorDTO): The sensor object associated with the prediction.
-        classificazione (str): The classification result from the model, one of:
-                              ["Good & Paved", "Good & Unpaved", "Bad & Paved", "Bad & Unpaved"].
     """
 
     class Schema(Schema):
         """
         Marshmallow schema for validating and serializing PredictionDTO objects.
-
-        Fields:
-            sensor_productor (SensorDTO.Schema): The sensor that produced the data.
-            classificazione (str): The classification result.
-            posizione_gps_latitude (float): The GPS latitude of the prediction.
-            posizione_gps_longitude (float): The GPS longitude of the prediction.
-
         """
-        sensor_id = fields.Str()
-        sensor_model = fields.Str()
-        sensor_serial= fields.Str()
+
+        timestampRilevazione= fields.DateTime()
         classificazione = fields.Str(required=True)
         posizione_gps_latitude = fields.Float(required=True)
         posizione_gps_longitude = fields.Float(required=True)
+        strada_rilevamento = fields.Str(required=True)
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -60,22 +48,16 @@ class PredictionDTO(BaseDTO):
         """
         return PredictionDTO(**data)
 
-    def __init__(self, sensor_id,sensor_model,sensor_serial, classificazione, posizione_gps_latitude, posizione_gps_longitude):
+    def __init__(self, classificazione, posizione_gps_latitude, posizione_gps_longitude,strada_rilevamento):
         """
         Initialize a new PredictionDTO instance.
 
-        Args:
-            sensor_productor (SensorDTO): The sensor that produced the data.
-            classificazione (str): The classification result.
-            posizione_gps_latitude (float): The GPS latitude of the prediction.
-            posizione_gps_longitude (float): The GPS longitude of the prediction.
+
         """
-        self.sensor_id = sensor_id
-        self.sensor_model = sensor_model
-        self.sensor_serial = sensor_serial
         self.classificazione = classificazione
         self.posizione_gps_latitude = posizione_gps_latitude
         self.posizione_gps_longitude = posizione_gps_longitude
+        self.strada_rilevamento = strada_rilevamento
 
     @classmethod
     def from_request(cls, json_data=None):
@@ -116,10 +98,8 @@ class PredictionDTO(BaseDTO):
                   - 'classificazione': The classification result
         """
         return {
-            'sensor_id': self.sensor_id,
-            'sensor_model': self.sensor_model,
-            'sensor_serial': self.sensor_serial,
             'classificazione': self.classificazione,
             'gps_latitude': self.posizione_gps_latitude,
-            'gps_longitude': self.posizione_gps_longitude
+            'gps_longitude': self.posizione_gps_longitude,
+            'strada_rilevamento': self.strada_rilevamento
         }
