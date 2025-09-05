@@ -7,7 +7,7 @@ from ..dto.prediction_dto import PredictionDTO
 class RabbitMQSender:
 
 
-    def __init__(self, host='localhost'):
+    def __init__(self, host='rabbit-host'):
 
         self.host = host
         self.connection = None
@@ -49,10 +49,11 @@ class RabbitMQSender:
                 ))
 
             print(f" [x] Messaggio inviato a RabbitMQ sulla coda '{queue_name}': {message_body}")
-
+            return True
         except Exception as e:
             print(f"Errore durante la pubblicazione del messaggio su RabbitMQ: {e}")
+            return False
         finally:
             if self.connection and self.connection.is_open:
                 self.connection.close()
-                print("Connessione a RabbitMQ chiusa.")
+                print("Data Layer Service: Connessione a RabbitMQ chiusa.")

@@ -6,7 +6,7 @@ services:
     build: .
     ports:
       - "8006:5000"
-      - "8000:8000"
+      - "8002:8000"
       - "5679:5678"
     expose:
       - "8000"
@@ -25,7 +25,7 @@ services:
     depends_on:
       - sqlite
     networks:
-      - py-net
+      - iot-net
   sqlite:
     image: hibitdev/sqlite:latest
     container_name: sqlite
@@ -33,7 +33,7 @@ services:
     ports:
       - "8191:8191"
     networks:
-      - py-net
+      - iot-net
     volumes:
       - sensor_data_volume:/data
     command: [ "tail", "-f", "/dev/null" ]  # Keeps the container running
@@ -42,5 +42,5 @@ volumes:
       sensor_data_volume:
 
 networks:
-  py-net:
-    driver: bridge
+  iot-net:
+    external: true

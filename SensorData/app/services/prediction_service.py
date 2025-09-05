@@ -144,12 +144,12 @@ class PredictionService:
         print("PREDICTION SERVICE map_prediction_to_label{prediction}")
         valutazione = ''
         if prediction == 0:
-            valutazione = "Good & Paved"
+            valutazione = "GOOD_AND_PAVED"
         elif prediction == 1:
-            valutazione = "Good & Unpaved"
+            valutazione = "GOOD_AND_UNPAVED"
         elif prediction == 2:
-            valutazione = "Bad & Paved"
+            valutazione = "BAD_AND_PAVED"
         elif prediction == 3:
-            valutazione = "Bad & Unpaved"
+            valutazione = "BAD_AND_UNPAVED"
 
         return valutazione
