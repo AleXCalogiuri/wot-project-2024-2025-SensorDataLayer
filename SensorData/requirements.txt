@@ -20,3 +20,7 @@ pandas>=2.2.3.250527
 
 # Typing e compatibilità
 typing-extensions>=4.0.0
+
+
+#MQTT
+pika
