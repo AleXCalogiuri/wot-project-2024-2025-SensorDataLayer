@@ -1,13 +1,11 @@
+
 services:
   app:
-    #env_file: .env
     build: .
     ports:
       - "8006:5000"
       - "8007:8000"
       - "5679:5678"
-    expose:
-      - "8000"
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
@@ -17,7 +15,7 @@ services:
       - .:/app
       - sensor_data_volume:/data
     cap_add:
-      - SYS_PTRACE  # Necessario per alcuni debugger
+      - SYS_PTRACE  # Necessary for some debuggers
     security_opt:
       - seccomp:unconfined
     depends_on:
@@ -25,6 +23,8 @@ services:
     networks:
       - iot-net
       - py-net
+    # Removed incorrect 'expose' entry (expose is for internal ports only)
+
   sqlite:
     image: alpine:latest
     container_name: sqlite
@@ -34,57 +34,12 @@ services:
     networks:
       - py-net
     volumes:
-      - sensor_data_volume:/daversion: '3.9'
-
-services:
-  app:
-    #env_file: .env
-    build: .
-    ports:
-      - "8006:5000"
-      - "8002:8000"
-      - "5679:5678"
-    expose:
-      - "8000"
-    environment:
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
-      - PYTHONUNBUFFERED=1
-      - DEBUGGER_PORT=5679
-    volumes:
-      - .:/app
-      - sensor_data_volume:/data
-    cap_add:
-      - SYS_PTRACE  # Necessario per alcuni debugger
-    security_opt:
-      - seccomp:unconfined
-    depends_on:
-      - sqlite
-    networks:
-      - iot-net
-  sqlite:
-    image: hibitdev/sqlite:latest
-    container_name: sqlite
-    hostname: sqlite.hibit
-    ports:
-      - "8191:8191"
-    networks:
-      - iot-net
-    volumes:
-      - sensor_data_volume:/data
+      - sensor_data_volume:/data  # Fixed mount path
+    # Moved 'command' from incorrect location in networks section
     command: [ "tail", "-f", "/dev/null" ]  # Keeps the container running
 
 volumes:
-      sensor_data_volume:
-
-networks:
-  iot-net:
-    external: true
-ta
-    command: [ "tail", "-f", "/dev/null" ]  # Keeps the container running
-
-volumes:
-      sensor_data_volume:
+  sensor_data_volume:
 
 networks:
   py-net:
