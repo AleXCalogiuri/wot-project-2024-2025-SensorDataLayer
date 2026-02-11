@@ -5,7 +5,7 @@
 Il servizio sensordatalayer fa parte del progetto Pothole detection in particolare si occupa di:
 
 - Tracciare i sensori in arrivo 
-- RRicevere le segnalazioni degli utenti
+- Ricevere le segnalazioni degli utenti
 - Identificare lo stato di salute della strada tramite random forest
 - Inviare tramite protocollo mqtt le informazioni sullo stato della strada,con coordinate geografiche e la via in cui è stata inviata la segnalazione
 
